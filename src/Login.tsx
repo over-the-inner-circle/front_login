@@ -1,33 +1,35 @@
 import React, { useEffect } from "react";
-import { useParams } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom";
 
 const Login = () => {
 
   const REQUEST_URL = "http://localhost:3001";
   const params = useParams();
+  const navigate = useNavigate();
 
-  // const requestUserData = async (provider: string, code: string): Promise<Response> => {
-  //   try {
-  //     const response = await fetch(`${REQUEST_URL}/auth/oauth2/${provider}`, {
-  //       method: "POST",
-  //       headers: {
-  //         "Content-Type": "application/json",
-  //       },
-  //       body: JSON.stringify({
-  //        code
-  //        }),
-  //     });
-  //     return response.json();
-  //   } catch (error) {
-  //     return Promise.reject(error);
-  //   }
-  // }
+  const fetchUserData = async (provider: string, code: string) => {
+      const response: Response = await fetch(`${REQUEST_URL}/auth/oauth2/${provider}`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ code: code }),
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        return data;
+      } else {
+        //TODO: 에러처리
+        return null;
+      }
+  }
 
   useEffect(() => {
 
-    const provider:string = params.provider || "";
+    const provider: string = params.provider || "";
     const urlQuery = new URLSearchParams(window.location.search);
-    const code = urlQuery.get('code');
+    const code = urlQuery.get("code");
 
     console.log("login page called");
     console.log(`provider is ${params.provider}`);
@@ -42,21 +44,33 @@ const Login = () => {
       // TODO : 에러처리
       return;
     }
-    // const response = requestUserData(provider, code);
-    // response.then((data) => {
-    //   if (data.status === 200 && data.body.getReader().read().then((result) => {result.value})) {
-    //     // TODO: 액세스 코드 온 경우 -> 메인화면으로
-    //   } else {
-    //     // TODO: 액세스 코드 안 온 경우 -> 회원가입 화면으로
-    // })
-    // response.then((data) => console.log(data));
+    // const result = fetchUserData(provider, code);
+    // result.then((data) => {
+    //   if (data.access_token) {
+    //     // user exists. Redirect to main page with access token and refresh token
+    //     console.log("user exists");
+    //     console.log(data);
+    //   } else if (data.provider) {
+    //     // user doesn't exist. Redirect to signup page with Oauth user info data.
+    //     navigate("/signup", { state:
+    //     {
+    //
+    //     }});
+    //   }
+    // });
 
     // TODO: 나중에 지우기
-    // setTimeout(() => {
-    //   window.location.href = "http://localhost:3000/sign-up";
-    // }, 1000);
+    setTimeout(() => {
+      // navigate("/main");
+      navigate("/sign-up", { state: {
+          provider: "42",
+          thirdPartyId: "123456",
+          profImg: "",
+          locale: "ko",
+        }});
+    }, 1000);
   }
-  , [params]);
+  , [params, navigate]);
 
   return (
     <div className="flex h-screen bg-true-gray">

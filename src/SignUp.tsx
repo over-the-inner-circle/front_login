@@ -1,15 +1,36 @@
 import React, { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import {useLocation, useNavigate} from "react-router-dom";
+import {OauthUserInfo} from "./interfaces/Login+interfaces";
 
 const SignUp = () => {
-  const [is2faOn, setIs2faOn] = useState(false);
-  const [username, setUsername] = useState("");
-  const navigate = useNavigate();
 
-  const signUpNewUser = () => {
+  const REQUEST_URL = "http://localhost:3001";
+
+  const [is2faOn, setIs2faOn] = useState(false);
+  const [nickname, setNickname] = useState("");
+  const navigate = useNavigate();
+  const location = useLocation();
+  const newUserInfo: OauthUserInfo = location.state || null;
+
+  const signUpNewUser = async () => {
     console.log("sign up new user");
-    console.log(`username is ${username}`);
-    // TODO : 회원가입
+    console.log(`username is ${nickname}`);
+    // TODO : 회원가입 API POST 요청
+    const response = await fetch(`${REQUEST_URL}/user`, {
+      method: "POST",
+      body: JSON.stringify({
+        "provider": newUserInfo.provider,
+        "third_party_id": newUserInfo.thirdPartyId,
+        "nickname": nickname,
+        "2FA": {},
+        "prof_img": newUserInfo.profImg,
+      }),
+    });
+    if (response.ok) {
+      //액세스 토큰을 줘야하는거 아님??
+      // TODO: 액세스 토큰 저장
+      navigate("/main");
+    }
   }
 
   const cancelSignUp = () => {
@@ -23,7 +44,7 @@ const SignUp = () => {
   }
 
   const onChangeUsernameInput = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setUsername(e.target.value);
+    setNickname(e.target.value);
   }
 
   const addProfilePhoto = () => {
